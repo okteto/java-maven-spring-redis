@@ -1,0 +1,57 @@
+# TODO: Take a look at Kubernetes best practices for Spring (see: https://spring.io/guides/topicals/spring-on-kubernetes/)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: spring-redis-app
+  labels:
+    app: spring-redis-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: spring-redis-app
+  template:
+    metadata:
+      labels:
+        app: spring-redis-app
+    spec:
+      containers:
+        - name: spring-redis-app
+          image: ramiro/java-spring-redis
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: spring-redis-app
+  labels:
+    app: spring-redis-app
+spec:
+  type: ClusterIP
+  selector:
+    app: spring-redis-app
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: spring-redis-loadbalancer
+  annotations:
+    dev.okteto.com/generate-host: "true"
+spec:
+  rules:
+    - http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: spring-redis-app
+                port: 
+                    number: 8080
