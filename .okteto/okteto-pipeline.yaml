@@ -1,0 +1,5 @@
+deploy:
+- okteto build -t okteto.dev/java-maven-spring-redis:${OKTETO_GIT_COMMIT}
+- kustomize create --resources k8s.yaml
+- kustomize edit set image ramiro/java-spring-redis=okteto.dev/java-maven-spring-redis:${OKTETO_GIT_COMMIT}
+- kubectl apply -k .
